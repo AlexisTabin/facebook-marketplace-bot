@@ -2,6 +2,7 @@ import os
 import pickle
 import time
 import random
+from helpers.login import login
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -15,7 +16,6 @@ from selenium.common.exceptions import ElementClickInterceptedException
 class Scraper:
 	# This time is used when we are waiting for element to get loaded in the html
 	wait_element_time = 30
-
 	# In this folder we will save cookies from logged in users
 	cookies_folder = 'cookies' + os.path.sep
 
@@ -64,6 +64,9 @@ class Scraper:
 		self.cookies_file_name = cookies_file_name + '.pkl'
 		self.cookies_file_path = self.cookies_folder + self.cookies_file_name
 
+		
+		# WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH,'//button[@id="cookies-accept-all"]'))).click()
+
 		# Check if there is a cookie file saved
 		if self.is_cookie_file():
 			# Load cookies
@@ -76,10 +79,15 @@ class Scraper:
 		
 		# Wait for the user to log in with maximum amount of time 5 minutes
 		print('Please login manually in the browser and after that you will be automatically loged in with cookies. Note that if you do not log in for five minutes, the program will turn off.')
-		is_logged_in = self.is_logged_in(300)
+		is_logged_in = self.is_logged_in(30)
 
+		if not is_logged_in:
+			login(self.driver)
+
+		is_logged_in = self.is_logged_in(30)
 		# User is not logged in so exit from the program
 		if not is_logged_in:
+			print('You are not logged in. Exiting the program.')
 			exit()
 
 		# User is logged in so save the cookies
